@@ -9,10 +9,12 @@
 # from datetime import datetime
 
 from django.http import JsonResponse
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
+
 # from .populate import initiate
 
 
@@ -22,13 +24,14 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
 def login_user(request):
     # Get username and password from request.POST dictionary
     data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
+    username = data["userName"]
+    password = data["password"]
     # Try to check if provide credential can be authenticated
     user = authenticate(username=username, password=password)
     data = {"userName": username}
@@ -38,13 +41,59 @@ def login_user(request):
         data = {"userName": username, "status": "Authenticated"}
     return JsonResponse(data)
 
+
 # Create a `logout_request` view to handle sign out request
-# def logout_request(request):
+def logout_request(request):
+    # User session terminate karna
+    logout(request)
+
+    # Ek JSON response return karna
+    data = {"userName": ""}
+    return JsonResponse(data)
+
+
 # ...
 
 # Create a `registration` view to handle sign up request
 # @csrf_exempt
-# def registration(request):
+# Continue in views.py
+
+def register_user(request):
+    # Get user data from POST request body (JSON)
+    data = json.loads(request.body)
+    username = data["userName"]
+    password = data["password"]
+    first_name = data["firstName"]
+    last_name = data["lastName"]
+    email = data["email"]
+
+    # Check if username already exists
+    if User.objects.filter(username=username).exists():
+        data = {
+            "status": "Already Registered",
+            "error": "User with same username is already registered",
+        }
+        return JsonResponse(data)
+
+    try:
+        # Create user object
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+        )
+
+        # Log in the new user immediately
+        login(request, user)
+        data = {"status": "User created and logged in", "userName": username}
+        return JsonResponse(data)
+
+    except Exception as e:
+        logger.error(f"Error during registration: {e}")
+        data = {"status": "Error", "error": str(e)}
+        return JsonResponse(data)
 # ...
 
 # # Update the `get_dealerships` view to render the index page with
