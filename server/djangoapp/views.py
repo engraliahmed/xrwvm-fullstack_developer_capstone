@@ -1,5 +1,10 @@
 # Uncomment the required imports before adding the code
 
+from .restapis import (
+    get_request,
+    analyze_review_sentiments,
+    post_review,
+)
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
@@ -123,17 +128,85 @@ def get_cars(request):
 
 # ...
 
+
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
 # def get_dealerships(request):
+def get_dealerships(request, state="All"):
+    endpoint = "/fetchDealers"
+
+    params = {}
+
+    if state == "All":
+        response = get_request(endpoint)
+    else:
+        endpoint = f"{endpoint}/{state}"
+        response = get_request(endpoint)
+
+    if isinstance(response, list):
+        dealerships = response
+        return JsonResponse({"status": 200, "dealers": dealerships})
+
+    elif isinstance(response, dict) and response.get("error"):
+        return JsonResponse(
+            {"status": 500, "message": f"Error from backend: {response.get('error')}"}
+        )
+
+    return JsonResponse(
+        {
+            "status": 500,
+            "message": "Error fetching dealership data or invalid response format",
+        }
+    )
+
+
 # ...
+
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
 # def get_dealer_reviews(request,dealer_id):
+def get_dealer_reviews(request, dealer_id):
+    endpoint = "/fetchReviews/dealer/" + str(dealer_id)
+    response = get_request(endpoint)
+
+    if isinstance(response, list):
+        reviews = response
+
+        for review in reviews:
+            review_text = review.get("review", "")
+
+            sentiment_data = analyze_review_sentiments(review_text)
+
+            review["sentiment"] = sentiment_data.get("sentiment", "neutral")
+
+        return JsonResponse({"status": 200, "reviews": reviews})
+
+    elif isinstance(response, dict) and response.get("error"):
+        return JsonResponse(
+            {"status": 500, "message": f"Error from backend: {response.get('error')}"}
+        )
+
+    return JsonResponse(
+        {"status": 404, "message": "Reviews not found or invalid response format"}
+    )
+
+
 # ...
+
 
 # Create a `get_dealer_details` view to render the dealer details
 # def get_dealer_details(request, dealer_id):
+def get_dealer_details(request, dealer_id):
+    endpoint = "/fetchDealer/" + str(dealer_id)
+    response = get_request(endpoint)
+
+    if response and response.get("error") is None:
+        dealer = response
+        return JsonResponse({"status": 200, "dealer": dealer})
+
+    return JsonResponse({"status": 404, "message": "Dealer not found"})
+
+
 # ...
 
 # Create a `add_review` view to submit a review

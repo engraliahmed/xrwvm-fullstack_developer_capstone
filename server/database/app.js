@@ -95,11 +95,10 @@ app.get("/fetchDealers/:state", async (req, res) => {
 
 // Express route to fetch dealer by a particular id
 app.get("/fetchDealer/:id", async (req, res) => {
-    //Write your code here
     const id = req.params.id;
     try {
-        // Mongoose documents mein aksar _id ya id field hoti hai
-        const dealer = await Dealership.findById(id);
+        // FIX: Numeric ID field se query karna
+        const dealer = await Dealership.findOne({ id: id });
 
         if (dealer) {
             res.json(dealer);
