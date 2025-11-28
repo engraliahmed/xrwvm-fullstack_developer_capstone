@@ -1,13 +1,15 @@
 # Uncomment the required imports before adding the code
 
-# from django.shortcuts import render
-# from django.http import HttpResponseRedirect, HttpResponse
-# from django.contrib.auth.models import User
-# from django.shortcuts import get_object_or_404, render, redirect
-# from django.contrib.auth import logout
-# from django.contrib import messages
-# from datetime import datetime
+from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth import logout
+from django.contrib import messages
+from datetime import datetime
 
+from .models import CarMake, CarModel
+from .populate import initiate
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -58,6 +60,7 @@ def logout_request(request):
 # @csrf_exempt
 # Continue in views.py
 
+
 def register_user(request):
     # Get user data from POST request body (JSON)
     data = json.loads(request.body)
@@ -94,6 +97,30 @@ def register_user(request):
         logger.error(f"Error during registration: {e}")
         data = {"status": "Error", "error": str(e)}
         return JsonResponse(data)
+
+
+# views.py mein
+def get_cars(request):
+    if CarMake.objects.all().count() == 0:
+        initiate()
+
+    car_models = CarModel.objects.select_related("car_make")
+
+    cars = []
+    for car_model in car_models:
+        cars.append(
+            {
+                "CarModel": car_model.name,
+                "CarMake": car_model.car_make.name,
+                "Type": car_model.type,
+                "Year": car_model.year,
+                "DealerId": car_model.dealer_id,
+            }
+        )
+
+    return JsonResponse({"CarModels": cars})
+
+
 # ...
 
 # # Update the `get_dealerships` view to render the index page with
