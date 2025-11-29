@@ -1,12 +1,10 @@
 // server/database/.jshintrc
 {
-    // Enable ES6 features (const, let, arrow functions)
-    "esversion": 6, 
+    // FIX 1: ES8 features (async/await) support karne ke liye esversion ko 8 karein
+    "esversion": 8, 
     // Enable Node.js environment (for console, require)
     "node": true, 
-    // Enable ES8 features like async/await and template literals
     "asi": true,
-    "undef": true,
-    // Trailing commas ko theek karna
-    "trailing": false
+    "trailing": false,
+    "undef": true
 }

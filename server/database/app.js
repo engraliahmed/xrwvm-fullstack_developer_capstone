@@ -11,6 +11,7 @@ const port = 3030;
 app.use(cors());
 app.use(express.json());
 
+// FIX: Dot Notation
 const reviews_data = JSON.parse(fs.readFileSync("reviews.json", "utf8"));
 const dealerships_data = JSON.parse(
     fs.readFileSync("dealerships.json", "utf8")
@@ -22,11 +23,14 @@ const Reviews = require("./review");
 const Dealerships = require("./dealership");
 
 Reviews.deleteMany({}).then(() => {
-    Reviews.insertMany(reviews_data["reviews"]);
+    // FIX: Dot Notation
+    Reviews.insertMany(reviews_data.reviews);
 });
 Dealerships.deleteMany({}).then(() => {
-    Dealerships.insertMany(dealerships_data["dealerships"]);
+    // FIX: Dot Notation
+    Dealerships.insertMany(dealerships_data.dealerships);
 });
+
 
 // Express route to home
 app.get("/", async (req, res) => {
@@ -106,25 +110,24 @@ app.get("/fetchDealer/:id", async (req, res) => {
 
 //Express route to insert review
 app.post("/insert_review", async (req, res) => {
-    // FIX 2: express.raw middleware removed, using express.json middleware
-    // FIX 2: Data is now in req.body because of express.json() middleware
+    // Data is in req.body because of express.json() middleware
     const data = req.body;
 
     // ID generation
     const documents = await Reviews.find().sort({ id: -1 });
-    let new_id = documents.length > 0 ? documents[0]["id"] + 1 : 1;
+    let new_id = documents.length > 0 ? documents[0].id + 1 : 1; // FIX: Dot notation
 
     const review = new Reviews({
         id: new_id,
-        name: data["user_name"] || data["name"], // Django se user_name
-        user_id: data["user_id"], // Django se user ID
-        dealership: data["dealership"],
-        review: data["review"],
-        purchase: data["purchase"],
-        purchase_date: data["purchase_date"],
-        car_make: data["car_make"],
-        car_model: data["car_model"],
-        car_year: data["car_year"],
+        name: data.user_name || data.name, // FIX: Dot notation
+        user_id: data.user_id, // FIX: Dot notation
+        dealership: data.dealership, // FIX: Dot notation
+        review: data.review, // FIX: Dot notation
+        purchase: data.purchase, // FIX: Dot notation
+        purchase_date: data.purchase_date, // FIX: Dot notation
+        car_make: data.car_make, // FIX: Dot notation
+        car_model: data.car_model, // FIX: Dot notation
+        car_year: data.car_year, // FIX: Dot notation
     });
 
     try {
