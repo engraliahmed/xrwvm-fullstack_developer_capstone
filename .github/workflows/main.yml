@@ -1,4 +1,5 @@
 # .github/workflows/main.yml - FINAL WORKING CODE
+
 name: 'Lint Code'
 on:
   push:
@@ -28,8 +29,8 @@ jobs:
 
     - name: Run Linter
       run: |
-        # CRITICAL FIX: --exclude=migrations/ aur Style errors ko ignore karein
-        # (E501: line length, E302: blank lines, W292: trailing newline, F401/F811: unused imports)
+        # Python Linting is now robust against common style errors
+        # Migrations folder excluded, common style errors ignored (E501, E302, W292, etc.)
         flake8 ./server --exclude=./server/djangoapp/migrations/ --ignore=E501,E302,W292,W291,E127,E128,F401,F811 
         echo "Linted all the python files successfully"
 
@@ -51,6 +52,7 @@ jobs:
 
     - name: Run Linter
       run: |
-        # CRITICAL FIX: JSHint ko ES8 features (async/await) support karne ke liye --esversion 8
-        find ./server/database -name "*.js" -exec jshint --esversion 8 {} +
+        # CRITICAL FIX: --esversion is replaced by --es6 to support ES6 features
+        # --node flag added for Node.js environment support (async/await)
+        find ./server/database -name "*.js" -exec jshint --es6 --node {} +
         echo "Linted all the js files successfully"
