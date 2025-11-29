@@ -1,0 +1,13 @@
+// server/database/.jshintrc
+{
+    // Enable ES6 features (const, let, arrow functions)
+    "esversion": 6, 
+    // Enable Node.js environment (for console, require)
+    "node": true, 
+    // Enable ES8 features like async/await and template literals
+    "esnext": true,
+    "asi": true,
+    "undef": true,
+    // Trailing commas ko theek karna
+    "trailing": false
+}
