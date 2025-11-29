@@ -126,7 +126,8 @@ def get_dealerships(request, state="All"):
 
     elif isinstance(response, dict) and response.get("error"):
         return JsonResponse(
-            {"status": 500, "message": f"Error from backend: {response.get('error')}"}
+            {"status": 500,
+              "message": f"Error from backend: {response.get('error')}"}
         )
 
     return JsonResponse(
@@ -182,7 +183,8 @@ def get_dealer_details(request, dealer_id):
 def add_review(request):
     if not request.user.is_authenticated:
         return JsonResponse(
-            {"status": 403, "message": "Unauthorized: Login required to post a review"}
+            {"status": 403,
+              "message": "Unauthorized: Login required to post a review"}
         )
 
     if request.method == "POST":

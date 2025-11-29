@@ -28,7 +28,7 @@ def get_request(endpoint, **kwargs):
         response = requests.get(request_url, params=kwargs)
 
         # Agar response OK hai (200), toh JSON data return karein
-        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()  
         return response.json()
 
     except requests.exceptions.RequestException as e:
@@ -74,4 +74,5 @@ def post_review(data_dict):
 
     except requests.exceptions.RequestException as e:
         print(f"Network exception occurred during POST: {e}")
-        return {"status": "error", "message": "Network error during review submission"}
+        return {"status": "error",
+                 "message": "Network error during review submission"}

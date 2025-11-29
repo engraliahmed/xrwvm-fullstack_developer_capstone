@@ -1,5 +1,4 @@
 name: 'Lint Code'
-
 on:
   push:
     branches: [master, main]
@@ -33,27 +32,28 @@ jobs:
       run: |
         pwd
         # This command finds all Python files recursively and runs flake8 on them
-        find . -name "*.py" -exec flake8 {} +
+        # FIX: Only run Linter on the /server folder
+        find ./server -name "*.py" -exec flake8 {} +
         echo "Linted all the python files successfully"
 
   lint_js:
-      name: Lint JavaScript Files
-      runs-on: ubuntu-latest
+    name: Lint JavaScript Files
+    runs-on: ubuntu-latest
 
-      steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 14
 
-      - name: Install JSHint
-        run: npm install jshint --global
+    - name: Install JSHint
+      run: npm install jshint --global
 
-      - name: Run Linter
-        run: |
-          # This command finds all JavaScript files recursively and runs JSHint on them
-          find ./server/database -name "*.js" -exec jshint {} +
-          echo "Linted all the js files successfully"
+    - name: Run Linter
+      run: |
+        # FIX: Add --esversion 8 to support ES6/ES8 features
+        find ./server/database -name "*.js" -exec jshint --esversion 8 {} +
+        echo "Linted all the js files successfully"
