@@ -1,28 +1,18 @@
-# Uncomment the required imports before adding the code
+# server/djangoapp/views.py
 
 from .restapis import (
     get_request,
     analyze_review_sentiments,
     post_review,
 )
-from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth import logout
-from django.contrib import messages
-from datetime import datetime
-
-from .models import CarMake, CarModel
-from .populate import initiate
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from .models import CarMake, CarModel
+from .populate import initiate
 import logging
 import json
-from django.views.decorators.csrf import csrf_exempt
-
-# from .populate import initiate
 
 
 # Get an instance of a logger
@@ -59,13 +49,7 @@ def logout_request(request):
     return JsonResponse(data)
 
 
-# ...
-
 # Create a `registration` view to handle sign up request
-# @csrf_exempt
-# Continue in views.py
-
-
 def register_user(request):
     # Get user data from POST request body (JSON)
     data = json.loads(request.body)
@@ -104,7 +88,6 @@ def register_user(request):
         return JsonResponse(data)
 
 
-# views.py mein
 def get_cars(request):
     if CarMake.objects.all().count() == 0:
         initiate()
@@ -126,16 +109,10 @@ def get_cars(request):
     return JsonResponse({"CarModels": cars})
 
 
-# ...
-
-
-# # Update the `get_dealerships` view to render the index page with
-# a list of dealerships
-# def get_dealerships(request):
 def get_dealerships(request, state="All"):
     endpoint = "/fetchDealers"
 
-    params = {}
+    # Fix: Removed unused local variable 'params'
 
     if state == "All":
         response = get_request(endpoint)
@@ -160,11 +137,6 @@ def get_dealerships(request, state="All"):
     )
 
 
-# ...
-
-
-# Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
 def get_dealer_reviews(request, dealer_id):
     endpoint = "/fetchReviews/dealer/" + str(dealer_id)
     response = get_request(endpoint)
@@ -191,36 +163,23 @@ def get_dealer_reviews(request, dealer_id):
     )
 
 
-# ...
-
-
-# Create a `get_dealer_details` view to render the dealer details
-# def get_dealer_details(request, dealer_id):
 def get_dealer_details(request, dealer_id):
     endpoint = "/fetchDealer/" + str(dealer_id)
     response = get_request(endpoint)
 
     if isinstance(response, list) and len(response) > 0:
-        # Agar Node API Array of one dealer bhejta hai
         dealer = response[0]
         return JsonResponse({"status": 200, "dealer": dealer})
 
     elif isinstance(response, dict) and response.get("error") is None:
-        # Agar Node API seedhe dealer object bhejta hai
         dealer = response
         return JsonResponse({"status": 200, "dealer": dealer})
 
     return JsonResponse({"status": 404, "message": "Dealer not found"})
 
 
-# ...
-
-
-# Create a `add_review` view to submit a review
-# def add_review(request):
 @csrf_exempt
 def add_review(request):
-    # Logged In check
     if not request.user.is_authenticated:
         return JsonResponse(
             {"status": 403, "message": "Unauthorized: Login required to post a review"}
@@ -228,15 +187,12 @@ def add_review(request):
 
     if request.method == "POST":
         try:
-            # 1. JSON data load karein
             data = json.loads(request.body)
 
-            # 2. User details add karna
+            # User details add karna
             data["user_id"] = request.user.id
             data["user_name"] = request.user.username
 
-            # 3. post_review function ko call karna
-            # CRITICAL FIX: post_review(data) call karna
             response = post_review(data)
 
             return JsonResponse(
@@ -252,12 +208,8 @@ def add_review(request):
                 {"status": 400, "message": "Invalid JSON format in request body"}
             )
         except Exception as e:
-            # Agar Node API mein ya network mein koi galti ho
             return JsonResponse(
                 {"status": 500, "message": f"Error in posting review: {e}"}
             )
 
     return JsonResponse({"status": 405, "message": "Method not allowed"})
-
-
-# ...

@@ -1,4 +1,4 @@
-// server/database/app.js mein, file ke top par
+// server/database/app.js - FINAL CORRECTED CODE
 const Dealership = require("./dealership");
 const Review = require("./review");
 const express = require("express");
@@ -9,7 +9,7 @@ const app = express();
 const port = 3030;
 
 app.use(cors());
-app.use(require("body-parser").urlencoded({ extended: false }));
+app.use(express.json());
 
 const reviews_data = JSON.parse(fs.readFileSync("reviews.json", "utf8"));
 const dealerships_data = JSON.parse(
@@ -19,19 +19,14 @@ const dealerships_data = JSON.parse(
 mongoose.connect("mongodb://mongo_db:27017/", { dbName: "dealershipsDB" });
 
 const Reviews = require("./review");
-
 const Dealerships = require("./dealership");
 
-try {
-    Reviews.deleteMany({}).then(() => {
-        Reviews.insertMany(reviews_data["reviews"]);
-    });
-    Dealerships.deleteMany({}).then(() => {
-        Dealerships.insertMany(dealerships_data["dealerships"]);
-    });
-} catch (error) {
-    res.status(500).json({ error: "Error fetching documents" });
-}
+Reviews.deleteMany({}).then(() => {
+    Reviews.insertMany(reviews_data["reviews"]);
+});
+Dealerships.deleteMany({}).then(() => {
+    Dealerships.insertMany(dealerships_data["dealerships"]);
+});
 
 // Express route to home
 app.get("/", async (req, res) => {
@@ -61,28 +56,20 @@ app.get("/fetchReviews/dealer/:id", async (req, res) => {
 // Express route to fetch all dealerships
 app.get("/fetchDealers", async (req, res) => {
     try {
-        // Simple find operation
         const dealers = await Dealership.find();
-
-        // Agar data milta hai, toh array of objects return karein
         res.status(200).json(dealers);
     } catch (error) {
         console.error("Error fetching all dealers:", error);
-        // Database ya Mongoose connection error
-        // Important: Agar app.js crash ho raha hai, toh yeh error use dikhni chahiye.
         res.status(500).json({
             error: "Internal Server Error: Failed to retrieve data from Mongo.",
         });
     }
 });
 
-
 // Express route to fetch Dealers by a particular state
 app.get("/fetchDealers/:state", async (req, res) => {
-    //Write your code here
     const state = req.params.state;
     try {
-        // Case-insensitive search for the state
         const dealers = await Dealership.find({
             state: { $regex: new RegExp(`^${state}$`, "i") },
         });
@@ -104,7 +91,6 @@ app.get("/fetchDealers/:state", async (req, res) => {
 app.get("/fetchDealer/:id", async (req, res) => {
     const id = req.params.id;
     try {
-        // FIX: Numeric ID field se query karna
         const dealer = await Dealership.findOne({ id: id });
 
         if (dealer) {
@@ -119,14 +105,19 @@ app.get("/fetchDealer/:id", async (req, res) => {
 });
 
 //Express route to insert review
-app.post("/insert_review", express.raw({ type: "*/*" }), async (req, res) => {
-    data = JSON.parse(req.body);
+app.post("/insert_review", async (req, res) => {
+    // FIX 2: express.raw middleware removed, using express.json middleware
+    // FIX 2: Data is now in req.body because of express.json() middleware
+    const data = req.body;
+
+    // ID generation
     const documents = await Reviews.find().sort({ id: -1 });
-    let new_id = documents[0]["id"] + 1;
+    let new_id = documents.length > 0 ? documents[0]["id"] + 1 : 1;
 
     const review = new Reviews({
         id: new_id,
-        name: data["name"],
+        name: data["user_name"] || data["name"], // Django se user_name
+        user_id: data["user_id"], // Django se user ID
         dealership: data["dealership"],
         review: data["review"],
         purchase: data["purchase"],
@@ -138,9 +129,9 @@ app.post("/insert_review", express.raw({ type: "*/*" }), async (req, res) => {
 
     try {
         const savedReview = await review.save();
-        res.json(savedReview);
+        res.status(201).json(savedReview);
     } catch (error) {
-        console.log(error);
+        console.error("Error inserting review:", error);
         res.status(500).json({ error: "Error inserting review" });
     }
 });

@@ -1,43 +1,46 @@
-const mongoose = require('mongoose');
+// server/database/dealership.js - LINTED CODE
+
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
 const dealerships = new Schema({
-	id: {
-    type: Number,
-    required: true,
-	},
-	city: {
-    type: String,
-    required: true
-  },
-  state: {
-    type: String,
-    required: true
-  },
-  address: {
-    type: String,
-    required: true
-  },
-  zip: {
-    type: String,
-    required: true
-  },
-  lat: {
-    type: String,
-    required: true
-  },
-  long: {
-    type: String,
-    required: true
-  },
-  short_name: {
-    type: String,
-  },
-  full_name: {
-    type: String,
-    required: true
-  }
+    id: {
+        type: Number,
+        required: true,
+    },
+    city: {
+        type: String,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+    },
+    address: {
+        type: String,
+        required: true,
+    },
+    zip: {
+        type: String,
+        required: true,
+    },
+    lat: {
+        type: String,
+        required: true,
+    },
+    long: {
+        type: String,
+        required: true,
+    },
+    short_name: {
+        type: String,
+    },
+    full_name: {
+        type: String,
+        required: true,
+    },
 });
 
-module.exports = mongoose.model('dealerships', dealerships);
+module.exports = mongoose.model("dealerships", dealerships);
+// W292 Fix: End of file should have a newline
