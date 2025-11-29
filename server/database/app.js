@@ -60,15 +60,22 @@ app.get("/fetchReviews/dealer/:id", async (req, res) => {
 
 // Express route to fetch all dealerships
 app.get("/fetchDealers", async (req, res) => {
-    //Write your code here
     try {
+        // Simple find operation
         const dealers = await Dealership.find();
-        res.json(dealers);
+
+        // Agar data milta hai, toh array of objects return karein
+        res.status(200).json(dealers);
     } catch (error) {
-        console.error("Error fetching dealers:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error fetching all dealers:", error);
+        // Database ya Mongoose connection error
+        // Important: Agar app.js crash ho raha hai, toh yeh error use dikhni chahiye.
+        res.status(500).json({
+            error: "Internal Server Error: Failed to retrieve data from Mongo.",
+        });
     }
 });
+
 
 // Express route to fetch Dealers by a particular state
 app.get("/fetchDealers/:state", async (req, res) => {

@@ -200,7 +200,13 @@ def get_dealer_details(request, dealer_id):
     endpoint = "/fetchDealer/" + str(dealer_id)
     response = get_request(endpoint)
 
-    if response and response.get("error") is None:
+    if isinstance(response, list) and len(response) > 0:
+        # Agar Node API Array of one dealer bhejta hai
+        dealer = response[0]
+        return JsonResponse({"status": 200, "dealer": dealer})
+
+    elif isinstance(response, dict) and response.get("error") is None:
+        # Agar Node API seedhe dealer object bhejta hai
         dealer = response
         return JsonResponse({"status": 200, "dealer": dealer})
 
