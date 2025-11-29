@@ -215,6 +215,49 @@ def get_dealer_details(request, dealer_id):
 
 # ...
 
+
 # Create a `add_review` view to submit a review
 # def add_review(request):
+@csrf_exempt
+def add_review(request):
+    # Logged In check
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"status": 403, "message": "Unauthorized: Login required to post a review"}
+        )
+
+    if request.method == "POST":
+        try:
+            # 1. JSON data load karein
+            data = json.loads(request.body)
+
+            # 2. User details add karna
+            data["user_id"] = request.user.id
+            data["user_name"] = request.user.username
+
+            # 3. post_review function ko call karna
+            # CRITICAL FIX: post_review(data) call karna
+            response = post_review(data)
+
+            return JsonResponse(
+                {
+                    "status": 200,
+                    "message": "Review submitted successfully",
+                    "response": response,
+                }
+            )
+
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"status": 400, "message": "Invalid JSON format in request body"}
+            )
+        except Exception as e:
+            # Agar Node API mein ya network mein koi galti ho
+            return JsonResponse(
+                {"status": 500, "message": f"Error in posting review: {e}"}
+            )
+
+    return JsonResponse({"status": 405, "message": "Method not allowed"})
+
+
 # ...
